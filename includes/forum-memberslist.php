@@ -213,7 +213,7 @@ class AsgarosForumMembersList {
                     }
 
                     echo '<div class="member-name">';
-                        echo $this->asgarosforum->getUsername($element->ID);
+						echo $this->asgarosforum->getUsername($element->ID);
                         echo '<small>'.$this->asgarosforum->permissions->getForumRole($element->ID).'</small>';
 
                         $usergroups = AsgarosForumUserGroups::getUserGroupsOfUser($element->ID, 'all', true);
@@ -221,7 +221,9 @@ class AsgarosForumMembersList {
                         if (!empty($usergroups)) {
                             echo '<small>';
 
-                            foreach ($usergroups as $usergroup) {
+	                        $usergroups = apply_filters('asgarosforum_filter_user_groups', $usergroups, $element);
+
+	                        foreach ($usergroups as $usergroup) {
                                 echo AsgarosForumUserGroups::render_usergroup_tag($usergroup);
                             }
 

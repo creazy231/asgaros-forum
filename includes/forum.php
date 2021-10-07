@@ -185,6 +185,8 @@ class AsgarosForum {
     var $approval       = null;
     var $spoilers       = null;
     var $polls          = null;
+    var $body           = '';
+    var $bodyAtts       = array();
 
     function __construct() {
         // Initialize database.
@@ -251,6 +253,7 @@ class AsgarosForum {
         $this->approval         = new AsgarosForumApproval($this);
         $this->spoilers         = new AsgarosForumSpoilers($this);
         $this->polls            = new AsgarosForumPolls($this);
+        $this->body          = '';
     }
 
     //======================================================================
@@ -621,6 +624,15 @@ class AsgarosForum {
 
             $this->add_notice($notice);
         }
+
+	    $custom_notices = apply_filters('asgarosforum_filter_custom_notices', array());
+
+	    foreach ( $custom_notices as $custom_notice ) {
+			$message = !empty($custom_notice["message"]) ? $custom_notice["message"] : null;
+			$link = !empty($custom_notice["link"]) ? $custom_notice["link"] : null;
+			$icon = !empty($custom_notice["icon"]) ? $custom_notice["icon"]: null;
+		    $this->add_notice($message, $link, $icon);
+	    }
     }
 
     function enqueue_css_js() {
@@ -757,7 +769,9 @@ class AsgarosForum {
         }
     }
 
-    function forum() {
+    function forum($atts, $content, $tag) {
+	    $this->body = $content;
+	    $this->bodyAtts = $atts;
         ob_start();
         echo '<div id="af-wrapper">';
 
@@ -847,6 +861,8 @@ class AsgarosForum {
     function showMainTitleAndDescription() {
         $mainTitle = $this->getMainTitle();
 
+	    $mainTitle = apply_filters('asgarosforum_filter_main_title', $mainTitle, $this->bodyAtts);
+
         echo '<h1 class="main-title main-title-'.$this->current_view.'">';
 
         // Show lock symbol for closed topics.
@@ -866,6 +882,8 @@ class AsgarosForum {
 
     function overview() {
         $categories = $this->content->get_categories();
+		$body = $this->body;
+		$bodyAtts = $this->bodyAtts;
 
         require('views/overview.php');
     }
@@ -1308,7 +1326,7 @@ class AsgarosForum {
                     $space_position = mb_strpos($string, ' ', $length, 'UTF-8');
                 } else {
                     $space_position = strpos($string, ' ', $length);
-                }   
+                }
 
                 if ($space_position) {
                     $length = $space_position;
@@ -1535,7 +1553,7 @@ class AsgarosForum {
                 $output .= '</div>';
             }
         }
-        
+
         return $output;
     }
 
@@ -1767,7 +1785,7 @@ class AsgarosForum {
 
         // Show report button.
         $menu .= $this->reports->render_report_button($post_id, $this->current_topic);
-        
+
         $menu = (!empty($menu)) ? '<div class="forum-post-menu">'.$menu.'</div>' : $menu;
         $menu = apply_filters('asgarosforum_filter_post_menu', $menu);
 
@@ -2362,7 +2380,7 @@ class AsgarosForum {
         $signature = trim($signature);
 
         // Allow filtering the signature.
-        $signature = apply_filters('asgarosforum_signature', $signature);
+        $signature = apply_filters('asgarosforum_signature', $signature, $user_id);
 
         // Ensure signature is not empty.
         if (empty($signature)) {

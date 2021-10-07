@@ -107,8 +107,11 @@ class AsgarosForumProfile {
                 echo '<div class="profile-forum-role">';
                 $count_posts = $this->asgarosforum->countPostsByUser($user_id);
                 $this->asgarosforum->render_reputation_badges($count_posts);
+
+	            $role = apply_filters('asgarosforum_filter_profile_role', $role, $user_data);
                 echo $role;
-                echo '</div>';
+
+				echo '</div>';
             echo '</div>';
         echo '</div>';
     }
@@ -132,7 +135,7 @@ class AsgarosForumProfile {
                 echo '<a href="'.$history_link.'">'.__('Post History', 'asgaros-forum').'</a>';
             }
 
-            do_action('asgarosforum_custom_profile_menu');
+            do_action('asgarosforum_custom_profile_menu', $user_data);
         echo '</div>';
     }
 
@@ -246,8 +249,9 @@ class AsgarosForumProfile {
 
                     // Show usergroups.
                     $userGroups = AsgarosForumUserGroups::getUserGroupsOfUser($userData->ID, 'all', true);
+	                $userGroups = apply_filters('asgarosforum_filter_user_groups', $userGroups, $userData);
 
-                    if (!empty($userGroups)) {
+	            if (!empty($userGroups)) {
                         $profileRows['usergroup'] = array(
                             'title' => __('Usergroups:', 'asgaros-forum'),
                             'value' => $userGroups,
@@ -333,7 +337,9 @@ class AsgarosForumProfile {
 
                     $current_user_id = get_current_user_id();
 
-                    if ($userData->ID == $current_user_id) {
+					$editProfile = true;
+	                $editProfile = apply_filters('asgarosforum_filter_edit_profile', $editProfile);
+                    if ($userData->ID == $current_user_id && $editProfile) {
                         echo '<a href="'.get_edit_profile_url().'" class="edit-profile-link">';
                             echo '<span class="fas fa-pencil-alt"></span>';
                             echo __('Edit Profile', 'asgaros-forum');

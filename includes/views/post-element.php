@@ -62,6 +62,8 @@ echo '<div class="post-element '.$highlight_class.' '.$first_post_class.'" id="p
 
             // Show groups of user.
             $usergroups = AsgarosForumUserGroups::getUserGroupsOfUser($post->author_id, 'all', true);
+	        $userData = get_user_by('id', $post->author_id);
+	        $usergroups = apply_filters('asgarosforum_filter_user_groups', $usergroups, $userData);
 
             if (!empty($usergroups)) {
                 echo '<div class="post-author-block-group">';

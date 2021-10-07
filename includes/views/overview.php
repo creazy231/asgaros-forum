@@ -2,7 +2,10 @@
 
 if (!defined('ABSPATH')) exit;
 
-if ($categories) {
+if ($body) {
+	if (!empty($bodyAtts["title"]))
+	echo $body;
+} else if ($categories) {
     $forumsAvailable = false;
 
     foreach ($categories as $category) {
